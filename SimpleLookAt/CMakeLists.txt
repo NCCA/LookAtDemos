@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 # Name of the project
-project(SimpleLookAt)
+set(PROJECT_NAME SimpleLookAt)
+project(${PROJECT_NAME})
 #Bring the headers into the project (local ones)
 include_directories(include $ENV{HOME}/NGL/include)
 
@@ -51,6 +52,6 @@ find_package(Qt5Core)
 
 
 # add exe and link libs this must be after the other defines
-add_executable(SimpleLookAt ${SOURCES})
-target_link_libraries(SimpleLookAt ${PROJECT_LINK_LIBS} Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::Widgets )
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_LINK_LIBS} Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::Widgets )
 
