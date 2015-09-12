@@ -1,17 +1,15 @@
 cmake_minimum_required(VERSION 2.8.11)
 # Name of the project
-set(PROJECT_NAME ${MultipleViews})
+set(PROJECT_NAME MultipleViews)
 project(${PROJECT_NAME})
 #Bring the headers into the project (local ones)
 include_directories(include $ENV{HOME}/NGL/include)
-
-#the file(GLOB...) allows for wildcard additions of our src dir
-set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp  
-			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
-			${PROJECT_SOURCE_DIR}/src/OpenGLWindow.cpp
-			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
-			${PROJECT_SOURCE_DIR}/include/OpenGLWindow.h
-
+set (PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}/${PROJECT_NAME})
+set(SOURCES src/main.cpp  
+			src/NGLScene.cpp  
+			src/OpenGLWindow.cpp
+			include/NGLScene.h  
+			include/OpenGLWindow.h
 )
 # define this if you want to include the stanford data sets
 # these are very big and make compilation time huge
