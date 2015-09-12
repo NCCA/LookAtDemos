@@ -4,7 +4,6 @@ set(PROJECT_NAME MultipleViews)
 project(${PROJECT_NAME})
 #Bring the headers into the project (local ones)
 include_directories(include $ENV{HOME}/NGL/include)
-set (PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}/${PROJECT_NAME})
 set(SOURCES src/main.cpp  
 			src/NGLScene.cpp  
 			src/OpenGLWindow.cpp
