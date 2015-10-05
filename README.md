@@ -5,3 +5,5 @@ These two demos demonstrate using the lookAt and perspective utility classes fro
 
 Interactive demos are [here](http://nccastaff.bournemouth.ac.uk/jmacey/WebGL/LookAt1/) and
 [here] (http://nccastaff.bournemouth.ac.uk/jmacey/WebGL/LookAt2/)
+
+Note this branch is an older version and will not be maintained as it uses the old OpenGL widget
