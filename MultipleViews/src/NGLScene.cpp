@@ -24,7 +24,7 @@ const static float ZOOM=0.1;
 //----------------------------------------------------------------------------------------------------------------------
 const static int FULLOFFSET=4;
 
-NGLScene::NGLScene(QWindow *_parent) : OpenGLWindow(_parent)
+NGLScene::NGLScene()
 {
   for(int i=0; i<5; ++i)
   {
@@ -58,20 +58,16 @@ NGLScene::~NGLScene()
   Init->NGLQuit();
 }
 
-void NGLScene::resizeEvent(QResizeEvent *_event )
+void NGLScene::resizeGL(int _w, int _h)
 {
-  m_width=this->size().width();
-  m_height=this->size().height();
+  m_width=_w;
+  m_height=_h;
   std::cout<<m_width<<" "<<m_height<<"\n";
-
-  if(isExposed())
-  {
-    renderLater();
-  }
+  update();
 }
 
 
-void NGLScene::initialize()
+void NGLScene::initializeGL()
 {
   // we need to initialise the NGL lib which will load all of the OpenGL functions, this must
   // be done once we have a valid GL context but before we call any GL commands. If we dont do
@@ -409,7 +405,7 @@ void NGLScene::toggleWindow()
 }
 
 
-void NGLScene::render()
+void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -453,7 +449,7 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
     m_panelMouseInfo[win].m_spinYFace += (float) 0.5f * diffx;
     m_panelMouseInfo[win].m_origX = _event->x();
     m_panelMouseInfo[win].m_origY = _event->y();
-    renderLater();
+    update();
 
 	}
 	// right mouse translate code
@@ -465,7 +461,7 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
 		m_panelMouseInfo[win].m_origYPos=_event->y();
 		m_panelMouseInfo[win].m_modelPos.m_x += INCREMENT * diffX;
 		m_panelMouseInfo[win].m_modelPos.m_y -= INCREMENT * diffY;
-		renderLater();
+		update();
 
 	}
 }
@@ -537,7 +533,7 @@ void NGLScene::wheelEvent(QWheelEvent *_event)
 	{
 		m_panelMouseInfo[win].m_modelPos.m_z-=ZOOM;
 	}
-	renderLater();
+	update();
 }
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -561,5 +557,5 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   }
   // finally update the NGLScene and re-draw
   //if (isExposed())
-    renderLater();
+    update();
 }
