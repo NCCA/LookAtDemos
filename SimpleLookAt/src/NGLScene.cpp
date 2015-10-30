@@ -37,11 +37,10 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
- glViewport(0,0,_w,_h);
- m_projection=ngl::perspective(15,(float)_w/_h,0.05,350);
- update();
+ m_width=_event->size().width()*devicePixelRatio();
+ m_height=_event->size().height()*devicePixelRatio();
 }
 
 
@@ -100,7 +99,7 @@ void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  glViewport(0,0,m_width,m_height);
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["nglDiffuseShader"]->use();

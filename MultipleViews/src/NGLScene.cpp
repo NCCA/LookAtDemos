@@ -22,7 +22,7 @@ const static float ZOOM=0.1;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the offset for full window mode mouse data
 //----------------------------------------------------------------------------------------------------------------------
-const static int FULLOFFSET=4;
+constexpr static int FULLOFFSET=4;
 
 NGLScene::NGLScene()
 {
@@ -34,13 +34,13 @@ NGLScene::NGLScene()
   }
 
   // now we need to set the scales for the ortho windos
-  m_panelMouseInfo[FRONT].m_modelPos.set(0,0,1);
-  m_panelMouseInfo[SIDE].m_modelPos.set(0,0,1);
-  m_panelMouseInfo[TOP].m_modelPos.set(0,0,1);
+  m_panelMouseInfo[static_cast<int>(Window::FRONT)].m_modelPos.set(0,0,1);
+  m_panelMouseInfo[static_cast<int>(Window::SIDE)].m_modelPos.set(0,0,1);
+  m_panelMouseInfo[static_cast<int>(Window::TOP)].m_modelPos.set(0,0,1);
 
 
   // mouse rotation values set to 0
-  m_activeWindow=ALL;
+  m_activeWindow=Window::ALL;
   m_mouseX=0;
   m_mouseY=0;
   setTitle("Multiple Views");
@@ -56,12 +56,10 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  m_width=_w;
-  m_height=_h;
-  std::cout<<m_width<<" "<<m_height<<"\n";
-  update();
+  m_width=_event->size().width();
+  m_height=_event->size().height();
 }
 
 
@@ -94,7 +92,7 @@ void NGLScene::initializeGL()
 void NGLScene::frameActive()
 {
   int win = (int)getActiveQuadrant();
-  if(m_activeWindow != ALL)
+  if(m_activeWindow != Window::ALL)
   {
     win= FULLOFFSET;
   }
@@ -119,7 +117,7 @@ void NGLScene::loadMatricesToShader()
  }
 
 
-void NGLScene::top(MODE _m)
+void NGLScene::top(Mode _m)
 {
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -127,9 +125,9 @@ void NGLScene::top(MODE _m)
 
   // Rotation based on the mouse position for our global transform
   int win=FULLOFFSET;
-  if(_m == PANEL)
+  if(_m == Mode::PANEL)
   {
-    win=TOP;
+    win=static_cast<int>(Window::TOP);
   }
 
 
@@ -146,7 +144,7 @@ void NGLScene::top(MODE _m)
     m_view=ngl::lookAt(from,to,up);
     m_projection=ngl::ortho(-1,1,-1,1, 0.1f, 100.0f);
     // x,y w/h
-    if(_m==PANEL)
+    if(_m==Mode::PANEL)
 
     {
       glViewport (0,(m_height/2)*devicePixelRatio(), (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
@@ -170,7 +168,7 @@ void NGLScene::top(MODE _m)
 
 }
 
-void NGLScene::side(MODE _m)
+void NGLScene::side(Mode _m)
 {
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -178,9 +176,9 @@ void NGLScene::side(MODE _m)
 
   // Rotation based on the mouse position for our global transform
   int win=FULLOFFSET;
-  if(_m == PANEL)
+  if(_m == Mode::PANEL)
   {
-    win=SIDE;
+    win=static_cast<int>(Window::SIDE);
   }
 
    // get the VBO instance and draw the built in teapot
@@ -198,7 +196,7 @@ void NGLScene::side(MODE _m)
     m_view=ngl::lookAt(from,to,up);
     m_projection=ngl::ortho(-1,1,-1,1, 0.1f, 100.0f);
     // x,y w/h
-    if(_m==PANEL)
+    if(_m==Mode::PANEL)
     {
       glViewport ((m_width/2)*devicePixelRatio(), 0, (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
     }
@@ -224,7 +222,7 @@ void NGLScene::side(MODE _m)
 
 
 }
-void NGLScene::persp(MODE _m)
+void NGLScene::persp(Mode _m)
 {
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -233,9 +231,9 @@ void NGLScene::persp(MODE _m)
   // Rotation based on the mouse position for our global transform
   // 4 is the panel full screen mode
   int win=FULLOFFSET;
-  if(_m == PANEL)
+  if(_m == Mode::PANEL)
   {
-    win=PERSP;
+    win=static_cast<int>(Window::PERSP);
   }
   ngl::Mat4 rotX;
   ngl::Mat4 rotY;
@@ -267,7 +265,7 @@ void NGLScene::persp(MODE _m)
     m_view=ngl::lookAt(from,to,up);
     m_projection=ngl::perspective(45,float(m_width/m_height),0.01,100);
     // x,y w/h
-    if(_m==PANEL)
+    if(_m==Mode::PANEL)
     {
       glViewport ((m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio(), (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
     }
@@ -290,16 +288,16 @@ void NGLScene::persp(MODE _m)
   }
 
 }
-void NGLScene::front(MODE _m)
+void NGLScene::front(Mode _m)
 {
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["nglDiffuseShader"]->use();
 
   int win=FULLOFFSET;
-  if(_m == PANEL)
+  if(_m == Mode::PANEL)
   {
-    win=FRONT;
+    win=static_cast<int>(Window::FRONT);
   }
 
    // get the VBO instance and draw the built in teapot
@@ -317,7 +315,7 @@ void NGLScene::front(MODE _m)
     m_view=ngl::lookAt(from,to,up);
     m_projection=ngl::ortho(-1,1,-1,1, 0.01f, 200.0f);
     // x,y w/h
-    if(_m==PANEL)
+    if(_m==Mode::PANEL)
     {
       glViewport (0,0, (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
     }
@@ -341,63 +339,63 @@ void NGLScene::front(MODE _m)
 }
 
 
-NGLScene::WINDOW NGLScene::getActiveQuadrant() const
+NGLScene::Window NGLScene::getActiveQuadrant() const
 {
   // find where the  mouse is and set quadrant
   if( (m_mouseX <m_width/2) && (m_mouseY<m_height/2) )
   {
-    return TOP;
+    return Window::TOP;
   }
   else if( (m_mouseX >=m_width/2) && (m_mouseY<m_height/2) )
   {
-    return PERSP;
+    return Window::PERSP;
   }
   else if( (m_mouseX <=m_width/2) && (m_mouseY>m_height/2) )
   {
-    return FRONT;
+    return Window::FRONT;
   }
   else if( (m_mouseX >=m_width/2) && (m_mouseY>m_height/2) )
   {
-    return SIDE;
+    return Window::SIDE;
   }
   else // should never get here but stops warning
   {
-    return ALL;
+    return Window::ALL;
   }
 }
 
 
 void NGLScene::toggleWindow()
 {
-  if(m_activeWindow ==ALL)
+  if(m_activeWindow ==Window::ALL)
   {
     m_activeWindow=getActiveQuadrant();
     //store mouse info as we have gone fullscreen
-    m_panelMouseInfo[FULLOFFSET].m_modelPos = m_panelMouseInfo[m_activeWindow].m_modelPos;
-    m_panelMouseInfo[FULLOFFSET].m_origX = m_panelMouseInfo[m_activeWindow].m_origX;
-    m_panelMouseInfo[FULLOFFSET].m_origY = m_panelMouseInfo[m_activeWindow].m_origY;
+    m_panelMouseInfo[FULLOFFSET].m_modelPos = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_modelPos;
+    m_panelMouseInfo[FULLOFFSET].m_origX = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origX;
+    m_panelMouseInfo[FULLOFFSET].m_origY = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origY;
 
-    m_panelMouseInfo[FULLOFFSET].m_spinXFace = m_panelMouseInfo[m_activeWindow].m_spinXFace;
-    m_panelMouseInfo[FULLOFFSET].m_spinYFace = m_panelMouseInfo[m_activeWindow].m_spinYFace;
-    m_panelMouseInfo[FULLOFFSET].m_origXPos = m_panelMouseInfo[m_activeWindow].m_origXPos;
-    m_panelMouseInfo[FULLOFFSET].m_origYPos = m_panelMouseInfo[m_activeWindow].m_origYPos;
-    m_panelMouseInfo[FULLOFFSET].m_rotate = m_panelMouseInfo[m_activeWindow].m_rotate;
-    m_panelMouseInfo[FULLOFFSET].m_translate = m_panelMouseInfo[m_activeWindow].m_translate;
+    m_panelMouseInfo[FULLOFFSET].m_spinXFace = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_spinXFace;
+    m_panelMouseInfo[FULLOFFSET].m_spinYFace = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_spinYFace;
+    m_panelMouseInfo[FULLOFFSET].m_origXPos = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origXPos;
+    m_panelMouseInfo[FULLOFFSET].m_origYPos = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origYPos;
+    m_panelMouseInfo[FULLOFFSET].m_rotate = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_rotate;
+    m_panelMouseInfo[FULLOFFSET].m_translate = m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_translate;
   }
   else
   {
     // store info as we are minimised
-    m_panelMouseInfo[m_activeWindow].m_modelPos = m_panelMouseInfo[FULLOFFSET].m_modelPos;
-    m_panelMouseInfo[m_activeWindow].m_origX = m_panelMouseInfo[FULLOFFSET].m_origX;
-    m_panelMouseInfo[m_activeWindow].m_origY = m_panelMouseInfo[FULLOFFSET].m_origY;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_modelPos = m_panelMouseInfo[FULLOFFSET].m_modelPos;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origX = m_panelMouseInfo[FULLOFFSET].m_origX;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origY = m_panelMouseInfo[FULLOFFSET].m_origY;
 
-    m_panelMouseInfo[m_activeWindow].m_spinXFace = m_panelMouseInfo[FULLOFFSET].m_spinXFace;
-    m_panelMouseInfo[m_activeWindow].m_spinYFace = m_panelMouseInfo[FULLOFFSET].m_spinYFace;
-    m_panelMouseInfo[m_activeWindow].m_origXPos = m_panelMouseInfo[FULLOFFSET].m_origXPos;
-    m_panelMouseInfo[m_activeWindow].m_origYPos = m_panelMouseInfo[FULLOFFSET].m_origYPos;
-    m_panelMouseInfo[m_activeWindow].m_rotate = m_panelMouseInfo[FULLOFFSET].m_rotate;
-    m_panelMouseInfo[m_activeWindow].m_translate = m_panelMouseInfo[FULLOFFSET].m_translate;
-    m_activeWindow=ALL;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_spinXFace = m_panelMouseInfo[FULLOFFSET].m_spinXFace;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_spinYFace = m_panelMouseInfo[FULLOFFSET].m_spinYFace;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origXPos = m_panelMouseInfo[FULLOFFSET].m_origXPos;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_origYPos = m_panelMouseInfo[FULLOFFSET].m_origYPos;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_rotate = m_panelMouseInfo[FULLOFFSET].m_rotate;
+    m_panelMouseInfo[static_cast<int>(m_activeWindow)].m_translate = m_panelMouseInfo[FULLOFFSET].m_translate;
+    m_activeWindow=Window::ALL;
   }
 
 }
@@ -410,18 +408,18 @@ void NGLScene::paintGL()
 
    switch(m_activeWindow)
    {
-     case ALL :
+     case Window::ALL :
      {
-       front(PANEL);
-       side(PANEL);
-       top(PANEL);
-       persp(PANEL);
+       front(Mode::PANEL);
+       side(Mode::PANEL);
+       top(Mode::PANEL);
+       persp(Mode::PANEL);
        break;
      }
-     case FRONT : {front(FULLSCREEN); break; }
-     case SIDE : {side(FULLSCREEN); break; }
-     case TOP : {top(FULLSCREEN); break; }
-     case PERSP : {persp(FULLSCREEN); break; }
+     case Window::FRONT : {front(Mode::FULLSCREEN); break; }
+     case Window::SIDE : {side(Mode::FULLSCREEN); break; }
+     case Window::TOP : {top(Mode::FULLSCREEN); break; }
+     case Window::PERSP : {persp(Mode::FULLSCREEN); break; }
 
    }
 }
@@ -432,7 +430,7 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
   m_mouseX=_event->x();
   m_mouseY=_event->y();
   int win;
-  if(m_activeWindow ==ALL)
+  if(m_activeWindow ==Window::ALL)
     win=(int)getActiveQuadrant();
   else
     win=FULLOFFSET;
@@ -469,7 +467,7 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
 void NGLScene::mousePressEvent ( QMouseEvent * _event)
 {
 	int win;
-	if(m_activeWindow ==ALL)
+	if(m_activeWindow ==Window::ALL)
 		win=(int)getActiveQuadrant();
 	else
 		win=FULLOFFSET;
@@ -498,7 +496,7 @@ void NGLScene::mouseReleaseEvent ( QMouseEvent * _event )
   // this event is called when the mouse button is released
   // we then set Rotate to false
   int win;
-  if(m_activeWindow ==ALL)
+  if(m_activeWindow ==Window::ALL)
     win=(int)getActiveQuadrant();
   else
     win=FULLOFFSET;
@@ -518,7 +516,7 @@ void NGLScene::wheelEvent(QWheelEvent *_event)
 {
 
 	int win;
-	if(m_activeWindow ==ALL)
+	if(m_activeWindow ==Window::ALL)
 		win=(int)getActiveQuadrant();
 	else
 		win=FULLOFFSET;
