@@ -14,11 +14,11 @@
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
-const static float INCREMENT=0.01;
+constexpr float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for the wheel zoom
 //----------------------------------------------------------------------------------------------------------------------
-const static float ZOOM=0.1;
+constexpr float ZOOM=0.1f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the offset for full window mode mouse data
 //----------------------------------------------------------------------------------------------------------------------
@@ -34,9 +34,9 @@ NGLScene::NGLScene()
   }
 
   // now we need to set the scales for the ortho windos
-  m_panelMouseInfo[static_cast<int>(Window::FRONT)].m_modelPos.set(0,0,1);
-  m_panelMouseInfo[static_cast<int>(Window::SIDE)].m_modelPos.set(0,0,1);
-  m_panelMouseInfo[static_cast<int>(Window::TOP)].m_modelPos.set(0,0,1);
+  m_panelMouseInfo[static_cast<int>(Window::FRONT)].m_modelPos.set(0.0f,0.0f,1.0f);
+  m_panelMouseInfo[static_cast<int>(Window::SIDE)].m_modelPos.set(0.0f,0.0f,1.0f);
+  m_panelMouseInfo[static_cast<int>(Window::TOP)].m_modelPos.set(0.0f,0.0f,1.0f);
 
 
   // mouse rotation values set to 0
@@ -44,9 +44,7 @@ NGLScene::NGLScene()
   m_mouseX=0;
   m_mouseY=0;
   setTitle("Multiple Views");
-  m_width=this->size().width();
-  m_height=this->size().height();
-  std::cout<<m_width<<" "<<m_height<<"\n";
+
 
 }
 
@@ -56,16 +54,13 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=_event->size().width();
-  m_height=_event->size().height();
-}
+
 
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_width=_w*devicePixelRatio();
-  m_height=_h*devicePixelRatio();
+  // take into account device ratio later in the resize to be safe
+  m_width=_w;
+  m_height=_h;
 }
 
 void NGLScene::initializeGL()
@@ -88,15 +83,13 @@ void NGLScene::initializeGL()
   // get the VBO instance and draw the built in teapot
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
   prim->createLineGrid("grid",40,40,40);
-  // as re-size is not explicitly called we need to do this.
-  glViewport(0, 0, width() * devicePixelRatio(), height() * devicePixelRatio());
 
 
 }
 
 void NGLScene::frameActive()
 {
-  int win = (int)getActiveQuadrant();
+  int win = static_cast<int>(getActiveQuadrant());
   if(m_activeWindow != Window::ALL)
   {
     win= FULLOFFSET;
@@ -117,8 +110,8 @@ void NGLScene::loadMatricesToShader()
   MVP= M*m_view*m_projection;
   normalMatrix=MV;
   normalMatrix.inverse();
-  shader->setShaderParamFromMat4("MVP",MVP);
-  shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("normalMatrix",normalMatrix);
  }
 
 
@@ -135,24 +128,22 @@ void NGLScene::top(Mode _m)
     win=static_cast<int>(Window::TOP);
   }
 
-
   // get the VBO instance and draw the built in teapot
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
-  ngl::Vec3 from(0,2,0);
-  ngl::Vec3 to(0,0,0);
-  ngl::Vec3 up(0,0,-1);
+  ngl::Vec3 from(0.0f,2.0f,0.0f);
+  ngl::Vec3 to(0.0f,0.0f,0.0f);
+  ngl::Vec3 up(0.0f,0.0f,-1.0f);
   m_globalTransform.reset();
   {
     /// a top view (left upper)
     m_view=ngl::lookAt(from,to,up);
-    m_projection=ngl::ortho(-1,1,-1,1, 0.1f, 100.0f);
+    m_projection=ngl::ortho(-1.0f,1.0f,-1.0f,1.0f, 0.1f, 100.0f);
     // x,y w/h
     if(_m==Mode::PANEL)
-
     {
-      glViewport (0,(m_height/2)*devicePixelRatio(), (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
+      glViewport (0,(m_height/2.0f)*devicePixelRatio(), (m_width/2.0f)*devicePixelRatio(), (m_height/2.0f)*devicePixelRatio());
     }
     else
     {
@@ -161,12 +152,12 @@ void NGLScene::top(Mode _m)
       // draw
     // in this case set to an identity
     ngl::Vec3 p=m_panelMouseInfo[win].m_modelPos;
-    m_globalTransform.setPosition(p.m_x,0,-p.m_y);
+    m_globalTransform.setPosition(p.m_x,0.0f,-p.m_y);
     m_globalTransform.setScale(p.m_z,p.m_z,p.m_z);
 
     loadMatricesToShader();
     prim->draw("troll");
-    m_globalTransform.addPosition(0,-1,0);
+    m_globalTransform.addPosition(0.0f,-1.0f,0.0f);
     loadMatricesToShader();
     prim->draw("grid");
   }
@@ -190,20 +181,20 @@ void NGLScene::side(Mode _m)
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
-  ngl::Vec3 from(0,2,0);
-  ngl::Vec3 to(0,0,0);
-  ngl::Vec3 up(0,0,-1);
+  ngl::Vec3 from(0.0f,2.0f,0.0f);
+  ngl::Vec3 to(0.0f,0.0f,0.0f);
+  ngl::Vec3 up(0.0f,0.0f,-1.0f);
   /// a side view (bottom right)
   m_globalTransform.reset();
   {
-    from.set(2,0,0);
-    up.set(0,1,0);
+    from.set(2.0f,0.0f,0.0f);
+    up.set(0.0f,1.0f,0.0f);
     m_view=ngl::lookAt(from,to,up);
-    m_projection=ngl::ortho(-1,1,-1,1, 0.1f, 100.0f);
+    m_projection=ngl::ortho(-1.0f,1.0f,-1.0f,1.0f, 0.1f, 100.0f);
     // x,y w/h
     if(_m==Mode::PANEL)
     {
-      glViewport ((m_width/2)*devicePixelRatio(), 0, (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
+      glViewport ((m_width/2.0f)*devicePixelRatio(), 0, (m_width/2.0f)*devicePixelRatio(), (m_height/2.0f)*devicePixelRatio());
     }
     else
     {
@@ -212,14 +203,14 @@ void NGLScene::side(Mode _m)
 
     // draw
     ngl::Vec3 p=m_panelMouseInfo[win].m_modelPos;
-    m_globalTransform.setPosition(0,p.m_y,-p.m_x);
+    m_globalTransform.setPosition(0.0f,p.m_y,-p.m_x);
     m_globalTransform.setScale(p.m_z,p.m_z,p.m_z);
 
 
     loadMatricesToShader();
     prim->draw("troll");
-    m_globalTransform.setRotation(90,90,0);
-    m_globalTransform.addPosition(0,0,2);
+    m_globalTransform.setRotation(90.0f,90.0f,0.0f);
+    m_globalTransform.addPosition(0.0f,0.0f,2.0f);
     loadMatricesToShader();
     prim->draw("grid");
   }
@@ -257,22 +248,22 @@ void NGLScene::persp(Mode _m)
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
-  ngl::Vec3 from(0,2,0);
-  ngl::Vec3 to(0,0,0);
-  ngl::Vec3 up(0,0,-1);
+  ngl::Vec3 from(0.0f,2.0f,0.0f);
+  ngl::Vec3 to(0.0f,0.0f,0.0f);
+  ngl::Vec3 up(0.0f,0.0f,-1.0f);
   m_globalTransform.reset();
   {
     /// a perspective view (right upper)
     //first set the global mouse rotation for this one
     m_globalTransform.setMatrix(final);
-    from.set(0,1,1);
-    up.set(0,1,0);
+    from.set(0.0f,1.0f,1.0f);
+    up.set(0.0f,1.0f,0.0f);
     m_view=ngl::lookAt(from,to,up);
-    m_projection=ngl::perspective(45,float(m_width/m_height),0.01,100);
+    m_projection=ngl::perspective(45.0f,static_cast<float>(m_width)/m_height,0.01f,100.0f);
     // x,y w/h
     if(_m==Mode::PANEL)
     {
-      glViewport ((m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio(), (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
+      glViewport ((m_width/2.0f)*devicePixelRatio(), (m_height/2.0f)*devicePixelRatio(), (m_width/2.0f)*devicePixelRatio(), (m_height/2.0f)*devicePixelRatio());
     }
     else
     {
@@ -309,20 +300,20 @@ void NGLScene::front(Mode _m)
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
-  ngl::Vec3 from(0,2,0);
-  ngl::Vec3 to(0,0,0);
-  ngl::Vec3 up(0,0,-1);
+  ngl::Vec3 from(0.0f,2.0f,0.0f);
+  ngl::Vec3 to(0.0f,0.0f,0.0f);
+  ngl::Vec3 up(0.0f,0.0f,-1.0f);
   /// a front view (bottom left)
   m_globalTransform.reset();
   {
-    from.set(0,0,2);
-    up.set(0,1,0);
+    from.set(0.0f,0.0f,2.0f);
+    up.set(0.0f,1.0f,0.0f);
     m_view=ngl::lookAt(from,to,up);
-    m_projection=ngl::ortho(-1,1,-1,1, 0.01f, 200.0f);
+    m_projection=ngl::ortho(-1.0f,1.0f,-1.0f,1.0f, 0.01f, 200.0f);
     // x,y w/h
     if(_m==Mode::PANEL)
     {
-      glViewport (0,0, (m_width/2)*devicePixelRatio(), (m_height/2)*devicePixelRatio());
+      glViewport (0,0, (m_width/2.0f)*devicePixelRatio(), (m_height/2.0f)*devicePixelRatio());
     }
     else
     {
@@ -331,12 +322,12 @@ void NGLScene::front(Mode _m)
     // draw
     // in this case set to an identity
     ngl::Vec3 p=m_panelMouseInfo[win].m_modelPos;
-    m_globalTransform.setPosition(p.m_x,p.m_y,0);
+    m_globalTransform.setPosition(p.m_x,p.m_y,0.0f);
     m_globalTransform.setScale(p.m_z,p.m_z,p.m_z);
     loadMatricesToShader();
     prim->draw("troll");
-    m_globalTransform.setRotation(90,0,0);
-    m_globalTransform.addPosition(0,0,-1);
+    m_globalTransform.setRotation(90.0f,0.0f,0.0f);
+    m_globalTransform.addPosition(0.0f,0.0f,-1.0f);
     loadMatricesToShader();
     prim->draw("grid");
   }
@@ -436,18 +427,20 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
   m_mouseY=_event->y();
   int win;
   if(m_activeWindow ==Window::ALL)
-    win=(int)getActiveQuadrant();
+    win=static_cast<int>(getActiveQuadrant());
   else
-    win=FULLOFFSET;
+    win=static_cast<int>(FULLOFFSET);
+  std::cout<<"moveEvent "<<win<<'\n';
   // note the method buttons() is the button state when event was called
   // this is different from button() which is used to check which button was
   // pressed when the mousePress/Release event is generated
   if(m_panelMouseInfo[win].m_rotate && _event->buttons() == Qt::LeftButton)
   {
+
     int diffx=_event->x()-m_panelMouseInfo[win].m_origX;
     int diffy=_event->y()-m_panelMouseInfo[win].m_origY;
-    m_panelMouseInfo[win].m_spinXFace += (float) 0.5f * diffy;
-    m_panelMouseInfo[win].m_spinYFace += (float) 0.5f * diffx;
+    m_panelMouseInfo[win].m_spinXFace +=  0.5f * diffy;
+    m_panelMouseInfo[win].m_spinYFace +=  0.5f * diffx;
     m_panelMouseInfo[win].m_origX = _event->x();
     m_panelMouseInfo[win].m_origY = _event->y();
     update();
@@ -456,8 +449,8 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
 	// right mouse translate code
 	else if(m_panelMouseInfo[win].m_translate && _event->buttons() == Qt::RightButton)
 	{
-		int diffX = (int)(_event->x() - m_panelMouseInfo[win].m_origXPos);
-		int diffY = (int)(_event->y() - m_panelMouseInfo[win].m_origYPos);
+    int diffX =(_event->x() - m_panelMouseInfo[win].m_origXPos);
+    int diffY =(_event->y() - m_panelMouseInfo[win].m_origYPos);
 		m_panelMouseInfo[win].m_origXPos=_event->x();
 		m_panelMouseInfo[win].m_origYPos=_event->y();
 		m_panelMouseInfo[win].m_modelPos.m_x += INCREMENT * diffX;
@@ -473,10 +466,10 @@ void NGLScene::mousePressEvent ( QMouseEvent * _event)
 {
 	int win;
 	if(m_activeWindow ==Window::ALL)
-		win=(int)getActiveQuadrant();
+    win=static_cast<int>(getActiveQuadrant());
 	else
-		win=FULLOFFSET;
-
+    win=static_cast<int>(FULLOFFSET);
+  std::cout<<"Mouse Presee "<<win<<'\n';
   // this method is called when the mouse button is pressed in this case we
   // store the value where the maouse was clicked (x,y) and set the Rotate flag to true
   if(_event->button() == Qt::LeftButton)
@@ -502,9 +495,12 @@ void NGLScene::mouseReleaseEvent ( QMouseEvent * _event )
   // we then set Rotate to false
   int win;
   if(m_activeWindow ==Window::ALL)
-    win=(int)getActiveQuadrant();
+    win=static_cast<int>(getActiveQuadrant());
   else
-    win=FULLOFFSET;
+    win=static_cast<int>(FULLOFFSET);
+
+  std::cout<<"Mouse release "<<win<<'\n';
+
   if (_event->button() == Qt::LeftButton)
   {
     m_panelMouseInfo[win].m_rotate=false;
@@ -522,9 +518,10 @@ void NGLScene::wheelEvent(QWheelEvent *_event)
 
 	int win;
 	if(m_activeWindow ==Window::ALL)
-		win=(int)getActiveQuadrant();
+    win=static_cast<int>(getActiveQuadrant());
 	else
-		win=FULLOFFSET;
+    win=static_cast<int>(FULLOFFSET);
+  std::cout<<"wheel "<<win<<'\n';
 	// check the diff of the wheel position (0 means no change)
 	if(_event->delta() > 0)
 	{
@@ -556,7 +553,5 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
     case Qt::Key_Space : toggleWindow(); break;
   default : break;
   }
-  // finally update the NGLScene and re-draw
-  //if (isExposed())
-    update();
+  update();
 }
