@@ -43,9 +43,9 @@ void NGLScene::initializeGL()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["nglDiffuseShader"]->use();
 
-  shader->setShaderParam4f("Colour",1,1,1,1);
-  shader->setShaderParam3f("lightPos",1,1,1);
-  shader->setShaderParam4f("lightDiffuse",1,1,1,1);
+  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  shader->setUniform("lightPos",1.0f,1.0f,1.0f);
+  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
 
   ngl::Vec3 from(2,2,2);
   ngl::Vec3 to(0,0,0);
@@ -55,7 +55,7 @@ void NGLScene::initializeGL()
   int w=this->size().width();
   int h=this->size().height();
 
-  m_projection=ngl::perspective(45,(float)w/h,0.05,350);
+  m_projection=ngl::perspective(45,static_cast<float>(w)/h,0.05f,350.0f);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
 
@@ -75,8 +75,8 @@ void NGLScene::loadMatricesToShader()
   MVP= MV*m_projection;
   normalMatrix=MV;
   normalMatrix.inverse();
-  shader->setShaderParamFromMat4("MVP",MVP);
-  shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("normalMatrix",normalMatrix);
  }
 
 void NGLScene::paintGL()
@@ -89,7 +89,6 @@ void NGLScene::paintGL()
   (*shader)["nglDiffuseShader"]->use();
 
   // Rotation based on the mouse position for our global transform
-  ngl::Transformation trans;
   ngl::Mat4 rotX;
   ngl::Mat4 rotY;
   // create the rotation matrices

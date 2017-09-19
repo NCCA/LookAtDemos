@@ -77,9 +77,9 @@ void NGLScene::initializeGL()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["nglDiffuseShader"]->use();
 
-  shader->setShaderParam4f("Colour",1,1,1,1);
-  shader->setShaderParam3f("lightPos",1,1,1);
-  shader->setShaderParam4f("lightDiffuse",1,1,1,1);
+  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  shader->setUniform("lightPos",1.0f,1.0f,1.0f);
+  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
   // get the VBO instance and draw the built in teapot
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
   prim->createLineGrid("grid",40,40,40);
