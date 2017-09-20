@@ -1,6 +1,5 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
-
 #include "NGLScene.h"
 #include <ngl/Camera.h>
 #include <ngl/Light.h>
@@ -27,10 +26,11 @@ constexpr static int FULLOFFSET=4;
 NGLScene::NGLScene()
 {
   for(int i=0; i<5; ++i)
+  for(auto &panel : m_panelMouseInfo)
   {
-    m_panelMouseInfo[i].m_spinXFace=0;
-    m_panelMouseInfo[i].m_spinYFace=0;
-    m_panelMouseInfo[i].m_rotate=false;
+    panel.m_spinXFace=0;
+    panel.m_spinYFace=0;
+    panel.m_rotate=false;
   }
 
   // now we need to set the scales for the ortho windos
@@ -39,10 +39,6 @@ NGLScene::NGLScene()
   m_panelMouseInfo[static_cast<int>(Window::TOP)].m_modelPos.set(0.0f,0.0f,1.0f);
 
 
-  // mouse rotation values set to 0
-  m_activeWindow=Window::ALL;
-  m_mouseX=0;
-  m_mouseY=0;
   setTitle("Multiple Views");
 
 
@@ -89,7 +85,7 @@ void NGLScene::initializeGL()
 
 void NGLScene::frameActive()
 {
-  int win = static_cast<int>(getActiveQuadrant());
+  auto win = static_cast<int>(getActiveQuadrant());
   if(m_activeWindow != Window::ALL)
   {
     win= FULLOFFSET;
