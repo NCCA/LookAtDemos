@@ -1,9 +1,9 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
+#include <QOpenGLWindow>
 #include <ngl/Vec3.h>
 #include <ngl/Mat4.h>
 #include "WindowParams.h"
-#include <QOpenGLWindow>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
 /// @brief this class inherits from the Qt OpenGLWindow and allows us to use NGL to draw OpenGL
