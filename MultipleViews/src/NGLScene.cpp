@@ -61,21 +61,19 @@ void NGLScene::initializeGL()
   // we need to initialise the NGL lib which will load all of the OpenGL functions, this must
   // be done once we have a valid GL context but before we call any GL commands. If we dont do
   // this everything will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
   // now to load the shader and set the values
   // grab an instance of shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
-  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
-  shader->setUniform("lightPos",1.0f,1.0f,1.0f);
-  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("lightPos",1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
   // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  prim->createLineGrid("grid",40,40,40);
+  ngl::VAOPrimitives::createLineGrid("grid",40,40,40);
 
 
 }
@@ -92,7 +90,6 @@ void NGLScene::frameActive()
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
   ngl::Mat4 MV;
   ngl::Mat4 MVP;
@@ -103,16 +100,15 @@ void NGLScene::loadMatricesToShader()
   MVP= m_projection*m_view*M;
   normalMatrix=MV;
   normalMatrix.inverse().transpose();
-  shader->setUniform("MVP",MVP);
-  shader->setUniform("normalMatrix",normalMatrix);
+  ngl::ShaderLib::setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("normalMatrix",normalMatrix);
  }
 
 
 void NGLScene::top(Mode _m)
 {
   // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
   // Rotation based on the mouse position for our global transform
   size_t win=FULLOFFSET;
@@ -121,8 +117,6 @@ void NGLScene::top(Mode _m)
     win=static_cast<size_t>(Window::TOP);
   }
 
-  // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
   ngl::Vec3 from(0.0f,2.0f,0.0f);
@@ -149,10 +143,10 @@ void NGLScene::top(Mode _m)
     m_globalTransform.setScale(p.m_z,p.m_z,p.m_z);
 
     loadMatricesToShader();
-    prim->draw("troll");
+    ngl::VAOPrimitives::draw("troll");
     m_globalTransform.addPosition(0.0f,-1.0f,0.0f);
     loadMatricesToShader();
-    prim->draw("grid");
+    ngl::VAOPrimitives::draw("grid");
   }
 
 }
@@ -160,8 +154,7 @@ void NGLScene::top(Mode _m)
 void NGLScene::side(Mode _m)
 {
   // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
   // Rotation based on the mouse position for our global transform
   size_t win=FULLOFFSET;
@@ -170,8 +163,6 @@ void NGLScene::side(Mode _m)
     win=static_cast<size_t>(Window::SIDE);
   }
 
-   // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
   ngl::Vec3 from(0.0f,2.0f,0.0f);
@@ -201,11 +192,11 @@ void NGLScene::side(Mode _m)
 
 
     loadMatricesToShader();
-    prim->draw("troll");
+    ngl::VAOPrimitives::draw("troll");
     m_globalTransform.setRotation(90.0f,90.0f,0.0f);
     m_globalTransform.addPosition(0.0f,0.0f,2.0f);
     loadMatricesToShader();
-    prim->draw("grid");
+    ngl::VAOPrimitives::draw("grid");
   }
 
 
@@ -213,9 +204,7 @@ void NGLScene::side(Mode _m)
 }
 void NGLScene::persp(Mode _m)
 {
-  // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
   // Rotation based on the mouse position for our global transform
   // 4 is the panel full screen mode
@@ -237,8 +226,6 @@ void NGLScene::persp(Mode _m)
   final.m_m[3][2] = m_panelMouseInfo[win].m_modelPos.m_z;
   // set this in the TX stack
 
-   // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
   ngl::Vec3 from(0.0f,2.0f,0.0f);
@@ -266,7 +253,7 @@ void NGLScene::persp(Mode _m)
 
     // draw
     loadMatricesToShader();
-    prim->draw("troll");
+    ngl::VAOPrimitives::draw("troll");
     // now we need to add an offset to the y position to draw the grid,
     // easiest way is to just modify the matrix directly
     final.m_m[3][1]-=0.8f;
@@ -274,15 +261,13 @@ void NGLScene::persp(Mode _m)
 
     //m_globalTransform.setPosition(0,-0.55,0);
     loadMatricesToShader();
-    prim->draw("grid");
+    ngl::VAOPrimitives::draw("grid");
   }
 
 }
 void NGLScene::front(Mode _m)
 {
-  // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
   size_t win=FULLOFFSET;
   if(_m == Mode::PANEL)
@@ -290,8 +275,6 @@ void NGLScene::front(Mode _m)
     win=static_cast<size_t>(Window::FRONT);
   }
 
-   // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // first draw a top  persp // front //side
   ngl::Vec3 from(0.0f,2.0f,0.0f);
@@ -319,11 +302,11 @@ void NGLScene::front(Mode _m)
     m_globalTransform.setPosition(p.m_x,p.m_y,0.0f);
     m_globalTransform.setScale(p.m_z,p.m_z,p.m_z);
     loadMatricesToShader();
-    prim->draw("troll");
+    ngl::VAOPrimitives::draw("troll");
     m_globalTransform.setRotation(90.0f,0.0f,0.0f);
     m_globalTransform.addPosition(0.0f,0.0f,-1.0f);
     loadMatricesToShader();
-    prim->draw("grid");
+    ngl::VAOPrimitives::draw("grid");
   }
 
 }

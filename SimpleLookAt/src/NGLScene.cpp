@@ -22,8 +22,8 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_win.width  = static_cast<int>( _w * devicePixelRatio() );
-  m_win.height = static_cast<int>( _h * devicePixelRatio() );
+  m_win.width  = static_cast<int>( _w *devicePixelRatio() );
+  m_win.height = static_cast<int>( _h *devicePixelRatio() );
 }
 
 
@@ -32,19 +32,17 @@ void NGLScene::initializeGL()
   // we need to initialise the NGL lib which will load all of the OpenGL functions, this must
   // be done once we have a valid GL context but before we call any GL commands. If we dont do
   // this everything will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
    // now to load the shader and set the values
-  // grab an instance of shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
-  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
-  shader->setUniform("lightPos",1.0f,1.0f,1.0f);
-  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("lightPos",1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
 
   ngl::Vec3 from(2,2,2);
   ngl::Vec3 to(0,0,0);
@@ -63,8 +61,6 @@ void NGLScene::initializeGL()
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-
   ngl::Mat4 MV;
   ngl::Mat4 MVP;
   ngl::Mat3 normalMatrix;
@@ -74,8 +70,8 @@ void NGLScene::loadMatricesToShader()
   MVP= m_projection*MV;
   normalMatrix=MV;
   normalMatrix.inverse().transpose();
-  shader->setUniform("MVP",MVP);
-  shader->setUniform("normalMatrix",normalMatrix);
+  ngl::ShaderLib::setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("normalMatrix",normalMatrix);
  }
 
 void NGLScene::paintGL()
@@ -83,9 +79,7 @@ void NGLScene::paintGL()
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glViewport(0,0,m_win.width,m_win.height);
-  // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
   // Rotation based on the mouse position for our global transform
   ngl::Mat4 rotX;
@@ -100,11 +94,8 @@ void NGLScene::paintGL()
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
 
-   // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  // draw
   loadMatricesToShader();
-  prim->draw("troll");
+  ngl::VAOPrimitives::draw("troll");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
