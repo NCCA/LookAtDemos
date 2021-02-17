@@ -219,7 +219,7 @@ void NGLScene::persp(Mode _m)
   rotX.rotateX(m_panelMouseInfo[win].m_spinXFace);
   rotY.rotateY(m_panelMouseInfo[win].m_spinYFace);
   // multiply the rotations
-  ngl::Mat4 final=rotY*rotX;
+  ngl::Mat4 final=rotX*rotY;
   // add the translations
   final.m_m[3][0] = m_panelMouseInfo[win].m_modelPos.m_x;
   final.m_m[3][1] = m_panelMouseInfo[win].m_modelPos.m_y;
